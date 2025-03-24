@@ -17,5 +17,10 @@ namespace PT.Logic.Implementations
             var users = _dataLayer.GetUsers();
             return users.Select(u => u.Name.ToUpper()).ToList();
         }
+        public List<string> GetUserNamesReversed()
+        {
+            var users = _dataLayer.GetUsers();
+            return users.Select(u => new string(u.Name.Reverse().ToArray())).ToList();
+        }
     }
 }

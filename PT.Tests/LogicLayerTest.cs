@@ -24,5 +24,12 @@ namespace PT.Tests
 
             CollectionAssert.AreEqual(new List<string> { "ARTUR", "DOMINIK" }, result, "Uppercase user names");
         }
+        [TestMethod]
+        public void GetUserNamesReversed_ReturnsReversedNames()
+        {
+            List<string> result = _userService.GetUserNamesReversed();
+
+            CollectionAssert.AreEqual(new List<string> { "rutrA", "kinimoD" }, result, "Reversed user names");
+        }
     }
 }
