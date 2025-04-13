@@ -52,4 +52,31 @@ public class CategoryService : ICategoryService
             await _context.SaveChangesAsync();
         }
     }
+    public async Task UpdateCategoryAsync(Category category)
+    {
+        var existingCategory = await _context.Categories
+            .FirstOrDefaultAsync(c => c.Id == category.Id);
+
+        if (existingCategory != null)
+        {
+            existingCategory.Name = category.Name;
+            await _context.SaveChangesAsync();
+        }
+    }
+
+    public async Task<List<Category>> GetCategoriesByBookIdAsync(int bookId)
+    {
+        return await _context.Categories
+            .Where(c => c.Books.Any(b => b.Id == bookId))
+            .ToListAsync();
+    }
+
+    public async Task<int> GetCategoryBooksCountAsync(int categoryId)
+    {
+        var category = await _context.Categories
+            .Include(c => c.Books)
+            .FirstOrDefaultAsync(c => c.Id == categoryId);
+
+        return category?.Books.Count ?? 0;
+    }
 }

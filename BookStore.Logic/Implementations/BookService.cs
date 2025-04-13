@@ -68,4 +68,55 @@ public class BookService : IBookService
             .Where(b => b.Categories.Any(c => c.Name == categoryName))
             .ToListAsync();
     }
+    public async Task UpdateBookAsync(Book book)
+    {
+        var existingBook = await _context.Books
+            .Include(b => b.Categories)
+            .FirstOrDefaultAsync(b => b.Id == book.Id);
+
+        if (existingBook != null)
+        {
+            // Manual property updates
+            existingBook.Title = book.Title;
+            existingBook.Author = book.Author;
+            existingBook.Pages = book.Pages;
+            existingBook.Price = book.Price;
+
+            // Handle categories if they're part of the update
+            if (book.Categories != null)
+            {
+                // Clear existing categories and add new ones
+                existingBook.Categories.Clear();
+                foreach (var category in book.Categories)
+                {
+                    existingBook.Categories.Add(category);
+                }
+            }
+
+            await _context.SaveChangesAsync();
+        }
+    }
+
+    public async Task<List<Book>> GetTopSellingBooksAsync(int count)
+    {
+        // This implementation assumes OrderItems exist and are related to Books
+        return await _context.Books
+            .Include(b => b.Categories)
+            .OrderByDescending(b => _context.OrderItems.Count(oi => oi.BookId == b.Id))
+            .Take(count)
+            .ToListAsync();
+    }
+
+    public async Task<decimal> GetBookPriceAsync(int id)
+    {
+        var book = await _context.Books.FindAsync(id);
+        return book?.Price ?? 0;
+    }
+
+    public async Task<bool> IsBookInStockAsync(int id)
+    {
+        // Simple implementation that just checks if book exists
+        var book = await _context.Books.FindAsync(id);
+        return book != null;
+    }
 }
