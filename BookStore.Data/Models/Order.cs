@@ -1,20 +1,12 @@
 ﻿namespace BookStore.Data.Models;
+
 public class Order
 {
     public int Id { get; set; }
-    public int CustomerId { get; set; }
-    public Customer Customer { get; set; } = null!;
-    public DateTime OrderDate { get; set; }
+    public int UserId { get; set; }
+    public User User { get; set; } = null!;
+    public DateTime OrderDate { get; set; } = DateTime.UtcNow;
     public decimal TotalAmount { get; set; }
-    public OrderStatus Status { get; set; }
-    public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
-}
 
-public enum OrderStatus
-{
-    Pending,
-    Processing,
-    Shipped,
-    Delivered,
-    Cancelled
+    public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
 }

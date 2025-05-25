@@ -1,7 +1,8 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
@@ -15,14 +16,24 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.4" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.4" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.4" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="MSTest" Version="3.6.1" />
   </ItemGroup>
 
   <ItemGroup>
-    <EditorConfigFiles Remove="C:\Users\domin\Documents\GitHub\Programming_Technologies_2025\BookStore.Data\Abstractions\.editorconfig" />
+    <ProjectReference Include="..\BookStore.Contracts\BookStore.Contracts.csproj" />
+    <ProjectReference Include="..\BookStore.Data\BookStore.Data.csproj" />
+    <ProjectReference Include="..\BookStore.Logic\BookStore.Logic.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="C:\Users\domin\Documents\GitHub\Programming_Technologies_2025\BookStore.Data\Abstractions\.editorconfig" />
+    <Using Include="Microsoft.VisualStudio.TestTools.UnitTesting" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

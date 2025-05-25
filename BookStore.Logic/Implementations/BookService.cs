@@ -1,9 +1,8 @@
-﻿using BookStore.Data.Abstractions;
+﻿using BookStore.Contracts;
+using BookStore.Data.Abstractions;
 using BookStore.Data.Models;
 using BookStore.Logic.Abstractions;
 using Microsoft.EntityFrameworkCore;
-
-namespace BookStore.Logic.Implementations;
 
 public class BookService : IBookService
 {
@@ -14,109 +13,117 @@ public class BookService : IBookService
         _context = context;
     }
 
-    public async Task AddBookAsync(Book book, List<int> categoryIds)
+    public async Task<BookDto> AddBookAsync(string title, string author, string isbn, decimal price, int stock)
     {
-        var categories = await _context.Categories
-            .Where(c => categoryIds.Contains(c.Id))
-            .ToListAsync();
-
-        book.Categories = categories;
+        var book = new Book
+        {
+            Title = title,
+            Author = author,
+            ISBN = isbn,
+            Price = price,
+            Stock = stock
+        };
 
         _context.Books.Add(book);
         await _context.SaveChangesAsync();
+
+        await LogEventAsync("Book Added", $"Added book '{title}' (ISBN: {isbn})");
+        await UpdateProcessStateAsync();
+
+        return ToDto(book);
     }
 
-    public async Task RemoveBookAsync(int id)
-    {
-        var book = await _context.Books
-            .Include(b => b.Categories)
-            .FirstOrDefaultAsync(b => b.Id == id);
-
-        if (book != null)
-        {
-            _context.Books.Remove(book);
-            await _context.SaveChangesAsync();
-        }
-    }
-
-    public async Task<Book?> GetBookByIdAsync(int id)
-    {
-        return await _context.Books
-            .Include(b => b.Categories)
-            .FirstOrDefaultAsync(b => b.Id == id);
-    }
-
-    public async Task<List<Book>> GetAllBooksAsync()
-    {
-        return await _context.Books
-            .Include(b => b.Categories)
-            .ToListAsync();
-    }
-
-    public async Task<List<Book>> GetBooksByCategoryIdAsync(int categoryId)
-    {
-        return await _context.Books
-            .Include(b => b.Categories)
-            .Where(b => b.Categories.Any(c => c.Id == categoryId))
-            .ToListAsync();
-    }
-
-    public async Task<List<Book>> GetBooksByCategoryNameAsync(string categoryName)
-    {
-        return await _context.Books
-            .Include(b => b.Categories)
-            .Where(b => b.Categories.Any(c => c.Name == categoryName))
-            .ToListAsync();
-    }
-    public async Task UpdateBookAsync(Book book)
-    {
-        var existingBook = await _context.Books
-            .Include(b => b.Categories)
-            .FirstOrDefaultAsync(b => b.Id == book.Id);
-
-        if (existingBook != null)
-        {
-            // Manual property updates
-            existingBook.Title = book.Title;
-            existingBook.Author = book.Author;
-            existingBook.Pages = book.Pages;
-            existingBook.Price = book.Price;
-
-            // Handle categories if they're part of the update
-            if (book.Categories != null)
-            {
-                // Clear existing categories and add new ones
-                existingBook.Categories.Clear();
-                foreach (var category in book.Categories)
-                {
-                    existingBook.Categories.Add(category);
-                }
-            }
-
-            await _context.SaveChangesAsync();
-        }
-    }
-
-    public async Task<List<Book>> GetTopSellingBooksAsync(int count)
-    {
-        // This implementation assumes OrderItems exist and are related to Books
-        return await _context.Books
-            .Include(b => b.Categories)
-            .OrderByDescending(b => _context.OrderItems.Count(oi => oi.BookId == b.Id))
-            .Take(count)
-            .ToListAsync();
-    }
-
-    public async Task<decimal> GetBookPriceAsync(int id)
+    public async Task<bool> RemoveBookAsync(int id)
     {
         var book = await _context.Books.FindAsync(id);
-        return book?.Price ?? 0;
+        if (book == null) return false;
+
+        _context.Books.Remove(book);
+        await _context.SaveChangesAsync();
+
+        await LogEventAsync("Book Removed", $"Removed book '{book.Title}' (ISBN: {book.ISBN})");
+        await UpdateProcessStateAsync();
+
+        return true;
     }
 
-    public async Task<bool> IsBookInStockAsync(int id)
+    public async Task<BookDto?> EditBookAsync(int id, string title, string author, string isbn, decimal price, int stock)
     {
-        // Simple implementation that just checks if book exists
         var book = await _context.Books.FindAsync(id);
-        return book != null;
+        if (book == null) return null;
+
+        book.Title = title;
+        book.Author = author;
+        book.ISBN = isbn;
+        book.Price = price;
+        book.Stock = stock;
+
+        await _context.SaveChangesAsync();
+
+        await LogEventAsync("Book Edited", $"Edited book '{title}' (ISBN: {isbn})");
+        await UpdateProcessStateAsync();
+
+        return ToDto(book);
+    }
+
+    public async Task<IEnumerable<BookDto>> GetAllBooksAsync()
+    {
+        return await _context.Books
+            .Select(b => ToDto(b))
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<BookDto>> GetBooksByAuthorAsync(string author)
+    {
+        return await _context.Books
+            .Where(b => b.Author.ToLower().Contains(author.ToLower()))
+            .Select(b => ToDto(b))
+            .ToListAsync();
+    }
+
+    public async Task<BookDto?> GetBookByIsbnAsync(string isbn)
+    {
+        var book = await _context.Books.FirstOrDefaultAsync(b => b.ISBN == isbn);
+        return book == null ? null : ToDto(book);
+    }
+
+    private static BookDto ToDto(Book book) => new BookDto
+    {
+        Id = book.Id,
+        Title = book.Title,
+        Author = book.Author,
+        ISBN = book.ISBN,
+        Price = book.Price,
+        Stock = book.Stock
+    };
+
+    private async Task LogEventAsync(string eventType, string description, int? userId = null)
+    {
+        var log = new EventLog
+        {
+            EventType = eventType,
+            Description = description,
+            UserId = userId
+        };
+
+        _context.EventLogs.Add(log);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task UpdateProcessStateAsync()
+    {
+        var totalBooksInStock = await _context.Books.SumAsync(b => b.Stock);
+        var totalOrders = await _context.Orders.CountAsync();
+        var totalRevenue = await _context.Orders.SumAsync(o => o.TotalAmount);
+
+        var snapshot = new ProcessState
+        {
+            TotalBooksInStock = totalBooksInStock,
+            TotalOrders = totalOrders,
+            TotalRevenue = totalRevenue
+        };
+
+        _context.ProcessStates.Add(snapshot);
+        await _context.SaveChangesAsync();
     }
 }

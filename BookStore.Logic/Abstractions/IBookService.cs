@@ -1,18 +1,13 @@
-﻿using BookStore.Data.Models;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
-
-namespace BookStore.Logic.Abstractions;
+﻿using BookStore.Contracts;
+using BookStore.Data.Models;
 
 public interface IBookService
 {
-    Task AddBookAsync(Book book, List<int> categoryIds);
-    Task RemoveBookAsync(int id);
-    Task<Book?> GetBookByIdAsync(int id);
-    Task<List<Book>> GetAllBooksAsync();
-    Task<List<Book>> GetBooksByCategoryIdAsync(int categoryId);
-    Task<List<Book>> GetBooksByCategoryNameAsync(string categoryName);
-    Task UpdateBookAsync(Book book);
-    Task<List<Book>> GetTopSellingBooksAsync(int count);
-    Task<decimal> GetBookPriceAsync(int id);
-    Task<bool> IsBookInStockAsync(int id);
+    Task<BookDto> AddBookAsync(string title, string author, string isbn, decimal price, int stock);
+    Task<bool> RemoveBookAsync(int id);
+    Task<BookDto?> EditBookAsync(int id, string title, string author, string isbn, decimal price, int stock);
+    Task<IEnumerable<BookDto>> GetAllBooksAsync();
+    Task<IEnumerable<BookDto>> GetBooksByAuthorAsync(string author);
+    Task<BookDto?> GetBookByIsbnAsync(string isbn);
+    Task UpdateProcessStateAsync();
 }

@@ -17,12 +17,4 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.4" />
   </ItemGroup>
 
-  <ItemGroup>
-    <EditorConfigFiles Remove="C:\Users\domin\Documents\GitHub\Programming_Technologies_2025\BookStore.Data\Abstractions\.editorconfig" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="C:\Users\domin\Documents\GitHub\Programming_Technologies_2025\BookStore.Data\Abstractions\.editorconfig" />
-  </ItemGroup>
-
 </Project>
