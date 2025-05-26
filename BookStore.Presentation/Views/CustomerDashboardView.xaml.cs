@@ -1,12 +1,25 @@
 ﻿using System.Windows.Controls;
-
-namespace BookStore.Presentation.Views
+using BookStore.Presentation.ViewModels;
+using BookStore.Contracts;
+namespace BookStore.Presentation.Views;
+public partial class CustomerDashboardView : UserControl
 {
-    public partial class CustomerDashboardView : UserControl
+    public CustomerDashboardView()
     {
-        public CustomerDashboardView()
+        InitializeComponent();
+
+        this.Loaded += (_, __) =>
         {
-            InitializeComponent();
-        }
+            if (this.DataContext is CustomerDashboardViewModel vm)
+            {
+                BookListBox.SelectionChanged += (s, e) =>
+                {
+                    vm.SelectedBooks.Clear();
+                    foreach (var item in BookListBox.SelectedItems)
+                        vm.SelectedBooks.Add((BookDto)item);
+                };
+            }
+        };
     }
 }
+

@@ -18,7 +18,9 @@ namespace BookStore.Presentation.ViewModels
 
         public ObservableCollection<BookDto> AvailableBooks { get; set; } = new();
         public ObservableCollection<OrderDto> PastOrders { get; set; } = new();
+        public ObservableCollection<BookDto> SelectedBooks { get; set; } = new();
 
+        
 
         private BookDto? _selectedBook;
         public BookDto? SelectedBook
@@ -33,7 +35,8 @@ namespace BookStore.Presentation.ViewModels
             }
         }
 
-        public bool CanOrderSelectedBook => SelectedBook != null;
+        public bool CanOrderSelectedBook => SelectedBooks.Any();
+
 
         private readonly AsyncCommand _orderSelectedBookCommand;
         public ICommand OrderSelectedBookCommand => _orderSelectedBookCommand;
@@ -50,6 +53,11 @@ namespace BookStore.Presentation.ViewModels
 
             _orderSelectedBookCommand = new AsyncCommand(OrderSelectedBookAsync, () => CanOrderSelectedBook);
 
+            SelectedBooks.CollectionChanged += (_, __) =>
+            {
+                OnPropertyChanged(nameof(CanOrderSelectedBook));
+                _orderSelectedBookCommand.RaiseCanExecuteChanged();
+            };
 
             LoadDataAsync();
         }
@@ -58,7 +66,7 @@ namespace BookStore.Presentation.ViewModels
         {
             var books = await _bookService.GetAllBooksAsync();
             AvailableBooks.Clear();
-            foreach (var book in books)
+            foreach (var book in books.Where(b => b.Stock > 0))
                 AvailableBooks.Add(book);
 
             await LoadOrdersAsync();
@@ -66,30 +74,33 @@ namespace BookStore.Presentation.ViewModels
 
         private async Task OrderSelectedBookAsync()
         {
-            if (SelectedBook == null)
+            if (!SelectedBooks.Any())
                 return;
 
-            var items = new List<(int bookId, int quantity)>
-    {
-        (SelectedBook.Id, 1)
-    };
+            var items = SelectedBooks.Select(b => (b.Id, 1)).ToList();
 
             try
             {
                 await _orderService.PlaceOrderAsync(_currentUser.Id, items);
 
-                MessageBox.Show($"Zamówienie na \"{SelectedBook.Title}\" zostało złożone pomyślnie!",
+                string titles = string.Join(", ", SelectedBooks.Select(b => $"\"{b.Title}\""));
+
+                MessageBox.Show($"Zamówienie na: {titles} zostało złożone pomyślnie!",
                                 "Potwierdzenie", MessageBoxButton.OK, MessageBoxImage.Information);
 
-                AvailableBooks.Remove(SelectedBook);
-                SelectedBook = null; // wyczyść zaznaczenie
+                foreach (var book in SelectedBooks.ToList())
+                    AvailableBooks.Remove(book);
 
+                SelectedBooks.Clear();
                 await LoadOrdersAsync();
+                await LoadDataAsync();
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Błąd podczas składania zamówienia: {ex.Message}",
                                 "Błąd", MessageBoxButton.OK, MessageBoxImage.Error);
+                await LoadOrdersAsync();
+                await LoadDataAsync();
             }
         }
         private async Task LoadOrdersAsync()
