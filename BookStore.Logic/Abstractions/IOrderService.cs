@@ -13,4 +13,5 @@ namespace BookStore.Logic.Abstractions
         Task<IEnumerable<OrderDto>> GetOrdersForUserAsync(int userId);
         Task<IEnumerable<OrderDto>> GetAllOrdersAsync();
     }
+
 }
