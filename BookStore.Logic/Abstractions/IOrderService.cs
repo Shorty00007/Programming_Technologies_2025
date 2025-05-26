@@ -10,5 +10,8 @@ namespace BookStore.Logic.Abstractions
     public interface IOrderService
     {
         Task<OrderDto> PlaceOrderAsync(int userId, List<(int bookId, int quantity)> items);
+        Task<IEnumerable<OrderDto>> GetOrdersForUserAsync(int userId);
+
     }
+
 }

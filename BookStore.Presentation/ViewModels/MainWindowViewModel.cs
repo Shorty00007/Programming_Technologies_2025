@@ -63,7 +63,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
     public void LoadCustomerDashboard()
     {
         var view = new CustomerDashboardView();
-        view.DataContext = new CustomerDashboardViewModel();
+        view.DataContext = new CustomerDashboardViewModel(_bookService, _orderService, CurrentUser!);
         CurrentView = view;
     }
 

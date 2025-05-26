@@ -2,11 +2,49 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              Height="600" Width="800">
-    <Grid>
-        <TextBlock Text="Welcome, Customer!"
-                   VerticalAlignment="Center"
-                   HorizontalAlignment="Center"
-                   FontSize="20"
-                   FontWeight="Bold"/>
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2*" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- Lista książek -->
+        <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,10,10">
+            <TextBlock Text="Dostępne książki" FontSize="16" FontWeight="Bold" Margin="0,0,0,5"/>
+            <ListBox ItemsSource="{Binding AvailableBooks}" 
+                     SelectedItem="{Binding SelectedBook}"
+                     DisplayMemberPath="Title"
+                     Height="200"/>
+            <Button Content="Zamów wybraną książkę" 
+                    Command="{Binding OrderSelectedBookCommand}" 
+                    IsEnabled="{Binding CanOrderSelectedBook}"
+                    Margin="0,10,0,0"/>
+        </StackPanel>
+
+        <!-- Historia zamówień -->
+        <StackPanel Grid.Row="1" Grid.Column="1" VerticalAlignment="Bottom" Margin="10,0,0,0">
+            <TextBlock Text="Historia zamówień" FontSize="14" FontWeight="Bold" Margin="0,0,0,5"/>
+            <ListBox ItemsSource="{Binding PastOrders}" Height="250">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Margin="0,5">
+                            <TextBlock Text="{Binding OrderDate, StringFormat='Data: {0:dd.MM.yyyy HH:mm}'}" FontWeight="Bold"/>
+                            <ItemsControl ItemsSource="{Binding Items}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding BookTitle}" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </StackPanel>
     </Grid>
 </UserControl>
