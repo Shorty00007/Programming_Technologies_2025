@@ -1,7 +1,7 @@
 ﻿<Window x:Class="BookStore.Presentation.Views.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Book Store" Height="600" Width="800" WindowStartupLocation="CenterScreen">
+        Title="Book Store" Height="720" Width="1280" WindowStartupLocation="CenterScreen">
     <Grid>
         <ContentControl Content="{Binding CurrentView}" />
     </Grid>

@@ -93,4 +93,14 @@ public class MockOrderService : IOrderService
     public IEnumerable<EventLog> GetLogs() => _logs;
     public IEnumerable<ProcessState> GetSnapshots() => _snapshots;
     public IEnumerable<Order> GetOrders() => _orders;
+
+    public Task<IEnumerable<OrderDto>> GetAllOrdersAsync()
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<IEnumerable<OrderDto>> GetOrdersForUserAsync(int userId)
+    {
+        throw new NotImplementedException();
+    }
 }

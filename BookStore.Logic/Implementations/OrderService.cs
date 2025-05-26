@@ -58,6 +58,21 @@ public class OrderService : IOrderService
         };
     }
 
+    public async Task<IEnumerable<OrderDto>> GetAllOrdersAsync()
+    {
+        return await _context.Orders
+            .OrderByDescending(o => o.OrderDate)
+            .Select(o => new OrderDto
+            {
+                Id = o.Id,
+                UserId = o.UserId,
+                OrderDate = o.OrderDate,
+                TotalAmount = o.TotalAmount
+            })
+            .ToListAsync();
+    }
+
+
     private async Task LogEventAsync(string eventType, string description, int? userId = null)
     {
         var log = new EventLog
@@ -86,5 +101,29 @@ public class OrderService : IOrderService
 
         _context.ProcessStates.Add(snapshot);
         await _context.SaveChangesAsync();
+    }
+
+    public async Task<IEnumerable<OrderDto>> GetOrdersForUserAsync(int userId)
+    {
+        var orders = await _context.Orders
+            .Include(o => o.OrderItems)
+            .ThenInclude(oi => oi.Book)
+            .Where(o => o.UserId == userId)
+            .OrderByDescending(o => o.OrderDate)
+            .ToListAsync();
+
+        return orders.Select(o => new OrderDto
+        {
+            Id = o.Id,
+            UserId = o.UserId,
+            OrderDate = o.OrderDate,
+            TotalAmount = o.TotalAmount,
+            Items = o.OrderItems.Select(oi => new OrderItemDto
+            {
+                BookTitle = oi.Book.Title,
+                Quantity = oi.Quantity,
+                UnitPrice = oi.UnitPrice
+            }).ToList()
+        });
     }
 }

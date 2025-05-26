@@ -4,6 +4,8 @@ using System.Windows.Controls;
 using BookStore.Presentation.Views;
 using BookStore.Presentation.ViewModels;
 using BookStore.Contracts;
+using BookStore.Presentation.ViewModels.Admin;
+using BookStore.Presentation.Views.Admin;
 
 namespace BookStore.Presentation.ViewModels;
 
@@ -70,7 +72,11 @@ public class MainWindowViewModel : INotifyPropertyChanged
     public void LoadAdminView()
     {
         var view = new AdminView();
-        view.DataContext = new AdminViewModel();
+        view.DataContext = new AdminViewModel(
+            _bookService,
+            _orderService,
+            _processStateService,
+            _eventLogService);
         CurrentView = view;
     }
 
