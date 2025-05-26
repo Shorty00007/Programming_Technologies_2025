@@ -35,8 +35,17 @@ public class BookService : IBookService
 
     public async Task<bool> RemoveBookAsync(int id)
     {
-        var book = await _context.Books.FindAsync(id);
+        var book = await _context.Books
+            .Include(b => b.OrderItems)
+            .FirstOrDefaultAsync(b => b.Id == id);
+
         if (book == null) return false;
+
+        // Check if book is used in any orders
+        if (book.OrderItems.Any())
+        {
+            throw new InvalidOperationException("Cannot delete this book because it is associated with existing orders.");
+        }
 
         _context.Books.Remove(book);
         await _context.SaveChangesAsync();

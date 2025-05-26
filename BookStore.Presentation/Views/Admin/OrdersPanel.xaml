@@ -3,12 +3,27 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <Grid Margin="10">
-        <DataGrid ItemsSource="{Binding Orders}" AutoGenerateColumns="False" IsReadOnly="True">
+        <DataGrid ItemsSource="{Binding Orders}"
+          SelectedItem="{Binding SelectedOrder, Mode=TwoWay}"
+          AutoGenerateColumns="False"
+          IsReadOnly="True">
+
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Order ID" Binding="{Binding Id}" Width="Auto" />
                 <DataGridTextColumn Header="Customer ID" Binding="{Binding UserId}" Width="Auto" />
                 <DataGridTextColumn Header="Date" Binding="{Binding OrderDate}" Width="*" />
                 <DataGridTextColumn Header="Total (€)" Binding="{Binding TotalAmount}" Width="*" />
+
+                <!-- View Button Column -->
+                <DataGridTemplateColumn Width="Auto" Header="View">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button Content="🔍"
+                            Command="{Binding DataContext.ViewDetailsCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                            CommandParameter="{Binding}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
     </Grid>

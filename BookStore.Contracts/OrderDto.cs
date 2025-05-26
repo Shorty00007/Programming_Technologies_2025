@@ -8,5 +8,6 @@
         public decimal TotalAmount { get; set; }
 
         public List<OrderItemDto> Items { get; set; } = new();
+        public string Username { get; set; } = string.Empty;
     }
 }

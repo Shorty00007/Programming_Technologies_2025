@@ -49,6 +49,11 @@ namespace BookStore.PresentationTests.ViewModels
             {
                 return Task.FromResult<IEnumerable<OrderDto>>(new List<OrderDto>());
             }
+
+            public Task<OrderDto?> GetOrderDetailsAsync(int orderId)
+            {
+                throw new NotImplementedException();
+            }
         }
 
         private class TestCustomerDashboardViewModel : CustomerDashboardViewModel

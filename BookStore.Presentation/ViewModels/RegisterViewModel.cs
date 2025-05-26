@@ -6,6 +6,8 @@ using BookStore.Presentation.Models;
 using BookStore.Presentation.Commands;
 using BookStore.Presentation.Helpers;
 using BookStore.Presentation.Views;
+using System.Text.RegularExpressions;
+using System.Windows;
 
 namespace BookStore.Presentation.ViewModels;
 public class RegisterViewModel
@@ -30,10 +32,32 @@ public class RegisterViewModel
 
     private async Task RegisterAsync()
     {
-        System.Diagnostics.Debug.WriteLine($"Password entered: '{Form.Password}'");
+        var username = Form.Username;
+        var password = Form.Password;
 
-        var user = await _userService.Register(Form.Username, Form.Password);
-        if (user != null)
-            _main.LoadLoginView();
+        if (string.IsNullOrWhiteSpace(username) || !Regex.IsMatch(username, @"^[a-zA-Z0-9]{1,16}$"))
+        {
+            MessageBox.Show("Username must be 1–16 characters long and contain only letters and numbers.",
+                            "Invalid Username", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(password) || password.Length > 16 || !Regex.IsMatch(password, @"^[\w\d\S]{1,16}$"))
+        {
+            MessageBox.Show("Password must be 1–16 characters long and can include letters, numbers, and special characters.",
+                            "Invalid Password", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        try
+        {
+            var user = await _userService.Register(username, password);
+            if (user != null)
+                _main.LoadLoginView();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Registration failed: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
     }
 }

@@ -36,7 +36,7 @@ public class AdminViewModel : INotifyPropertyChanged
         ShowProcessStateCommand = new RelayCommand(LoadProcessPanel);
         ShowLogsCommand = new RelayCommand(LoadLogsPanel);
 
-        LoadBooksPanel(); // Default view
+        LoadBooksPanel();
     }
 
     private UserControl? _currentPanel;

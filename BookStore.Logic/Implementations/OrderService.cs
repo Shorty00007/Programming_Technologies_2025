@@ -126,4 +126,31 @@ public class OrderService : IOrderService
             }).ToList()
         });
     }
+
+    public async Task<OrderDto?> GetOrderDetailsAsync(int orderId)
+    {
+        var order = await _context.Orders
+            .Include(o => o.User)
+            .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Book)
+            .FirstOrDefaultAsync(o => o.Id == orderId);
+
+        return order == null ? null : new OrderDto
+        {
+            Id = order.Id,
+            UserId = order.UserId,
+            Username = order.User.Username,
+            OrderDate = order.OrderDate,
+            TotalAmount = order.TotalAmount,
+            Items = order.OrderItems.Select(oi => new OrderItemDto
+            {
+                Id = oi.Id,
+                OrderId = oi.OrderId,
+                BookId = oi.BookId,
+                BookTitle = oi.Book.Title,
+                Quantity = oi.Quantity,
+                UnitPrice = oi.UnitPrice
+            }).ToList()
+        };
+    }
 }

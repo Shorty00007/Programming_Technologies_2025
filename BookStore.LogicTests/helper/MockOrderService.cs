@@ -103,4 +103,9 @@ public class MockOrderService : IOrderService
     {
         throw new NotImplementedException();
     }
+
+    public Task<OrderDto?> GetOrderDetailsAsync(int orderId)
+    {
+        throw new NotImplementedException();
+    }
 }

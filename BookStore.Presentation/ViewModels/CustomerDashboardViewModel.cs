@@ -85,8 +85,8 @@ namespace BookStore.Presentation.ViewModels
 
                 string titles = string.Join(", ", SelectedBooks.Select(b => $"\"{b.Title}\""));
 
-                MessageBox.Show($"Zamówienie na: {titles} zostało złożone pomyślnie!",
-                                "Potwierdzenie", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show($"Order for: {titles} was placed successfully!",
+                                "Confirmation", MessageBoxButton.OK, MessageBoxImage.Information);
 
                 foreach (var book in SelectedBooks.ToList())
                     AvailableBooks.Remove(book);
@@ -97,8 +97,8 @@ namespace BookStore.Presentation.ViewModels
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Błąd podczas składania zamówienia: {ex.Message}",
-                                "Błąd", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Error while placing the order: {ex.Message}",
+                                "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 await LoadOrdersAsync();
                 await LoadDataAsync();
             }
